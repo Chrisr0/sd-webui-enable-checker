@@ -3,7 +3,10 @@
 
 A simple extension for [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
 
-![Screenhot](https://user-images.githubusercontent.com/963961/226173353-1663b5ba-0394-4505-8811-fcaa0711bf65.png)
+Fork modified to work better with [Kitchen theme](https://github.com/canisminor1990/sd-web-ui-kitchen-theme.git)
+
+![Screenhot](https://user-images.githubusercontent.com/36136394/228960629-86b64ab4-b317-4e67-b713-d4ded549d6f6.png)
+
 
 ## Customize colors
 
