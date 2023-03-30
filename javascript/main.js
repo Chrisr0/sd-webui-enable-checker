@@ -86,9 +86,12 @@ enableCheckerInit = function () {
     set_color();
 
     if (is_active) {
-      header.style.backgroundColor = color_enable;
+      header.style.setProperty('background-color', color_enable, 'important');
+      if (header.firstElementChild){
+        header.firstElementChild.style.setProperty('background-color', color_disable, 'important');
+      }
     } else {
-      header.style.backgroundColor = color_disable;
+      header.style.setProperty('background-color', color_disable, 'important');
     }
   }
 
@@ -111,7 +114,7 @@ enableCheckerInit = function () {
       return;
     }
 
-    const header = component.querySelectorAll("span.transition")[0].parentNode;
+    const header = component;
     const controlnet_parts = component.querySelector("#controlnet");
     let is_active = false;
     if (controlnet_parts) {
