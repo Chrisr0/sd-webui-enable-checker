@@ -51,17 +51,19 @@ enableCheckerInit = function () {
           opts.enable_checker_custom_color_invalid_additional_networks;
       } else {
         if (isDarkColor(document.body.style.backgroundColor)) {
-          this.color_enable = "#237366";
-          this.color_disable = "#5a5757";
-          this.color_dropdown_enable = "#233873";
+          this.color_enable = "#1668dc";
+          this.color_disable = "#2d2d2d";
+          this.color_dropdown_enable = "#2c3340";
+          this.color_dropdown_disable = "#2b1818";
+          this.custom_color_zero_weihgt = this.color_dropdown_disable;
         } else {
           this.color_enable = "skyblue";
           this.color_disable = "#aeaeae"; // light grey
           this.color_dropdown_enable = "#a4f8f1"; // light green
+          this.color_dropdown_disable = this.color_disable;
+          this.custom_color_zero_weihgt = this.color_disable;
         }
-        this.color_dropdown_disable = this.color_disable;
-        this.custom_color_zero_weihgt = this.color_disable;
-        this.color_invalid_additional_networks = "#ed9797";
+        this.color_invalid_additional_networks = "#2b1818";
       }
 
       this.componentId2componentIndex = {};
@@ -130,12 +132,12 @@ enableCheckerInit = function () {
 
   function change_bg(header, is_active) {
     if (is_active) {
-      header.style.setProperty('background-color', color_enable, 'important');
+      header.style.setProperty('background-color', setting.color_enable, 'important');
       if (header.firstElementChild){
-        header.firstElementChild.style.setProperty('background-color', color_disable, 'important');
+        header.firstElementChild.style.setProperty('background-color', setting.color_disable, 'important');
       }
     } else {
-      header.style.setProperty('background-color', color_disable, 'important');
+      header.style.setProperty('background-color', setting.color_disable, 'important');
     }
   }
 
@@ -242,7 +244,7 @@ enableCheckerInit = function () {
       return;
     }
 
-    const header = get_component_header(component);
+    const header = component;
     const controlnet_parts = component.querySelector("#controlnet");
     let is_active = false;
     if (controlnet_parts) {
