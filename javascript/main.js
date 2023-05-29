@@ -143,11 +143,15 @@ enableCheckerInit = function () {
 
   function operate_controlnet_component(controlnet_parts) {
     let found_active_tab = false;
-    const divs = controlnet_parts.querySelectorAll(":scope>div>div>div");
+    const divs = controlnet_parts
+      .querySelector(".tabs")
+      .querySelectorAll(":scope>div");
     if (divs == undefined || divs.length < 1) {
       return null;
     }
-    const tabs = divs[0].querySelectorAll(":scope>button");
+    const tabs = controlnet_parts
+      .querySelectorAll(".tab-nav")[0]
+      .querySelectorAll("button");
     if (tabs.length == 0) {
       return null;
     }
@@ -191,7 +195,7 @@ enableCheckerInit = function () {
     return str.toLowerCase() === "none" || str.toLowerCase() === "nothing";
   }
 
-  function is_target_dropwodn(component) {
+  function is_target_dropdown(component) {
     let root = component;
     while (root && !root.id) {
       root = root.parentNode;
@@ -220,15 +224,15 @@ enableCheckerInit = function () {
       return;
     }
 
-    const inners = component.querySelectorAll(".wrap-inner");
+    const inners = component.querySelectorAll("[class*=wrap-inner]");
     for (let k = 0; k < inners.length; k++) {
       const inner = inners[k];
-      const ddom = inner.querySelector(".wrap-inner span.single-select");
-      if (!is_target_dropwodn(ddom)) {
+      const ddom = inner.querySelector("input");
+      if (!is_target_dropdown(ddom)) {
         continue;
       }
 
-      if (is_none(ddom.innerText)) {
+      if (is_none(ddom.value)) {
         inner.style.backgroundColor = setting.color_dropdown_disable;
       } else {
         inner.style.backgroundColor = setting.color_dropdown_enable;
@@ -260,43 +264,48 @@ enableCheckerInit = function () {
     change_bg(header, is_active);
   }
 
-  const visited = new Set();
-  function operate_component_for_first_visit(component) {
-    const header = get_component_header(component);
-    function is_panel_open() {
-      return header.classList.contains("open");
+  function fix_seed(ev) {
+    let target;
+    if (!ev.composed) {
+      target = ev.target;
+    } else {
+      target = ev.composedPath()[0];
     }
 
-    visited.add(component.id);
-    // To check initial status, open the panel
-    const icon = component.querySelector("span.icon");
-    let panel_opened = false;
-    if (icon && !is_panel_open()) {
-      icon.click(); //Open
-      panel_opened = true;
+    if (
+      target?.tagName?.toLowerCase() != "a" ||
+      target?.innerText != "Generate forever"
+    ) {
+      return;
     }
 
-    const observer = new MutationObserver((mutationsList, observer) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === "childList") {
-          operate_component(component);
-
-          if (panel_opened) {
-            if (icon && is_panel_open()) {
-              icon.click(); // Close
-              panel_opened = false;
-            } else {
-              continue; // need to close but not closed
-            }
-          }
-          observer.disconnect();
+    function get_active_tab() {
+      for (const name of ["img2img", "txt2img"]) {
+        const tab = gradioApp().getElementById(`tab_${name}`);
+        if (tab && tab.style.display !== "none") {
+          return name;
         }
       }
-    });
-    observer.observe(component, { childList: true, subtree: true });
+      return null;
+    }
+
+    const active_tab = get_active_tab();
+    if (active_tab === null) {
+      return;
+    }
+
+    const seed_input = gradioApp()
+      .getElementById(`${active_tab}_seed`)
+      .querySelector("input");
+    seed_input.value = -1;
+    updateInput(seed_input);
   }
 
-  function main_enable_checker() {
+  function main_enable_checker(ev) {
+    if (opts.enable_checker_fix_forever_randomly_seed) {
+      fix_seed(ev);
+    }
+
     const area = get_script_area();
     if (!area || opts === undefined) {
       return;
@@ -310,11 +319,7 @@ enableCheckerInit = function () {
     for (let j = 0; j < components.length; j++) {
       const component = components[j];
 
-      if (visited.has(component.id)) {
-        operate_component(component);
-      } else {
-        operate_component_for_first_visit(component);
-      }
+      operate_component(component);
     }
   }
   function init_network_checker(tabname, force) {
@@ -403,12 +408,12 @@ const init_network_checker = init_enableChecker[1];
 const main_network_checker = init_enableChecker[2];
 const onui_enable_checker = init_enableChecker[3];
 
-gradioApp().addEventListener("click", function () {
-  main_enable_checker();
+gradioApp().addEventListener("click", function (ev) {
+  main_enable_checker(ev);
 });
 
-onUiUpdate(function () {
-  main_enable_checker();
+onUiUpdate(function (ev) {
+  main_enable_checker(ev);
 });
 
 onUiLoaded(function () {
